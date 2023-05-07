@@ -1,0 +1,43 @@
+SELECT name FROM movies.movie WHERE year = 2000
+
+---- 2
+SELECT m.year, m.name
+FROM movies.movie AS m
+JOIN movies.genre AS g ON m.mid = g.mid
+WHERE g.genre = 'Drama';
+-----3
+SELECT year, COUNT(*) AS num_movies
+FROM movies.movie
+GROUP BY year;
+----4
+SELECT a.role
+FROM movies.person AS p
+JOIN movies.acts AS a ON p.pid = a.pid
+WHERE p.name = 'Bruce Willis';
+----5 
+SELECT COUNT(*) FROM movies.person;
+---6 
+SELECT name, year
+FROM movies.movie
+WHERE rating BETWEEN 8.7 AND 9.0;
+---7 
+SELECT name, COUNT(DISTINCT name) AS num_actors
+FROM movies.movie
+GROUP BY name;
+-- NOTE for 7, it returns 249 rows, not 251 as the ex says it should, this is due to 2 pieces of NULL data, can be seen by the command below
+SELECT *
+FROM movies.movie
+WHERE name IS NULL;
+---8 (this one was solid)
+SELECT DISTINCT movie.name
+FROM movies.movie
+WHERE movie.mid IN (
+    SELECT DISTINCT acts.mid
+    FROM movies.acts
+    WHERE acts.role LIKE 'Dr.%'
+);
+---9
+-- this one is weird, it said 1 row with value 2867 in excercise but there is 3279 actors...code is correct i think since 1 row is returned 
+SELECT COUNT(DISTINCT pid) AS total_actors
+FROM movies.person;
+--10
