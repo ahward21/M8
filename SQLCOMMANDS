@@ -38,6 +38,78 @@ WHERE movie.mid IN (
 );
 ---9
 -- this one is weird, it said 1 row with value 2867 in excercise but there is 3279 actors...code is correct i think since 1 row is returned 
-SELECT COUNT(DISTINCT pid) AS total_actors
-FROM movies.person;
+SELECT COUNT(DISTINCT pid) FROM ACTS
 --10
+SELECT language.language, COUNT(DISTINCT language.mid) as NumberOfMovies
+FROM language 
+GROUP BY language
+SORT BY language 
+
+--PART 2
+---19
+SET search_path TO dab_dda22232b_95;
+
+CREATE TABLE teacher (
+    teacher_id INTEGER PRIMARY KEY, 
+    teacher_name VARCHAR(50) 
+);
+
+CREATE TABLE course (
+    course_code VARCHAR(10) PRIMARY KEY, 
+    course_name VARCHAR(50)
+);
+
+CREATE TABLE quarter (
+    year INTEGER, 
+    quarter INTEGER, 
+    start_month VARCHAR(10), 
+    end_month VARCHAR(10),
+    PRIMARY KEY (year, quarter)
+);
+
+CREATE TABLE nofstudents (
+    teacher_id INTEGER, 
+    course_code VARCHAR(10), 
+    year INTEGER, 
+    quarter INTEGER,
+    nofstudents INTEGER,
+    FOREIGN KEY (teacher_id) REFERENCES teacher(teacher_id),
+    FOREIGN KEY (course_code) REFERENCES course(course_code),
+    FOREIGN KEY (year, quarter) REFERENCES quarter(year, quarter)
+);
+--20 
+
+INSERT INTO dab_dda22232b_95.course (course_code, course_name)
+SELECT DISTINCT course_code, course
+FROM srs.courses;
+
+INSERT INTO dab_dda22232b_95.quarter (year, quarter, start_month, end_month)
+SELECT DISTINCT year, quarter,
+    CASE quarter
+        WHEN 1 THEN 'September'
+        WHEN 2 THEN 'November'
+        WHEN 3 THEN 'January'
+        WHEN 4 THEN 'March'
+        ELSE NULL
+    END AS start_month,
+    CASE quarter
+        WHEN 1 THEN 'November'
+        WHEN 2 THEN 'January'
+        WHEN 3 THEN 'March'
+        WHEN 4 THEN 'May'
+        ELSE NULL
+    END AS end_month
+FROM srs.education;
+
+INSERT INTO dab_dda22232b_95.teacher (teacher_id, teacher_name)
+SELECT DISTINCT teacher_id, teacher
+FROM srs.education;
+
+INSERT INTO dab_dda22232b_95.nofstudents (teacher_id, course_code, year, quarter, nofstudents)
+SELECT education.teacher_id, grades.course_code, grades.year, grades.quarter, COUNT(grades.student_id) AS nofstudents 
+FROM srs.grades 
+JOIN srs.education ON grades.course_code = education.course_code 
+AND grades.year = education.year 
+AND grades.quarter = education.quarter 
+GROUP BY education.teacher_id, grades.course_code, grades.year, grades.quarter;
+
